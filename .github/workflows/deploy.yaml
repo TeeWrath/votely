@@ -1,4 +1,4 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Deploy Flutter Web to GitHub Pages deploy yamk
 
 on:
   push:
@@ -21,6 +21,10 @@ jobs:
           flutter-version: '3.24.3' # Use a stable version, update if needed
           channel: 'stable'
           cache: true
+
+      # Move to project directory
+      - name: change directory
+        run: cd flutter_web
 
       # Install dependencies
       - name: Install dependencies
