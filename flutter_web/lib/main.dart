@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'dart:html' as html;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +20,8 @@ class VotingApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Votely',
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF0A0A0A), // Deep black
-        primaryColor: const Color(0xFFFFD700), // Vibrant gold
+        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
+        primaryColor: const Color(0xFFFFD700),
         textTheme: const TextTheme(
           headlineLarge: TextStyle(
             fontSize: 28,
@@ -90,7 +92,7 @@ class VotingApp extends StatelessWidget {
           ),
         ),
         snackBarTheme: SnackBarThemeData(
-          backgroundColor: const Color(0xFF00E676), // Neon green
+          backgroundColor: const Color(0xFF00E676),
           contentTextStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -239,8 +241,8 @@ class VotingPage extends StatefulWidget {
 }
 
 class _VotingPageState extends State<VotingPage> {
-  final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
-  List<String> candidates = []; // No placeholder candidates
+  final String serverUrl = 'http://192.168.29.80:5000';
+  List<String> candidates = [];
   final _streamController = StreamController<List<String>>.broadcast();
   String? _errorMessage;
 
@@ -360,7 +362,8 @@ class _VotingPageState extends State<VotingPage> {
               duration: const Duration(seconds: 3),
             ),
           );
-          // Redirect to Results page
+          // Delay to ensure totalvotes.json is saved
+          await Future.delayed(const Duration(seconds: 1));
           final homePageState = context.findAncestorStateOfType<_HomePageState>();
           homePageState?._switchToResults();
         }
@@ -463,7 +466,7 @@ class _VotingPageState extends State<VotingPage> {
                                 onPressed: () {
                                   final homePageState = context.findAncestorStateOfType<_HomePageState>();
                                   homePageState?.setState(() {
-                                    homePageState._currentIndex = 2; // Add Candidate page
+                                    homePageState._currentIndex = 2;
                                   });
                                 },
                                 child: const Text('Add Candidates'),
@@ -517,11 +520,12 @@ class ResultsPage extends StatefulWidget {
 }
 
 class _ResultsPageState extends State<ResultsPage> {
-  final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
+  final String serverUrl = 'http://192.168.29.80:5000';
   final _streamController = StreamController<Map<String, int>>.broadcast();
   String? _errorMessage;
   String? _winner;
   bool _isServerShutdown = false;
+  Map<String, int> _lastResults = {};
 
   @override
   void initState() {
@@ -544,10 +548,10 @@ class _ResultsPageState extends State<ResultsPage> {
     final results = await fetchResults();
     if (!_streamController.isClosed) {
       if (results.isNotEmpty) {
+        _lastResults = results; // Cache results
         _streamController.add(results);
         setState(() {
           _errorMessage = null;
-          // Determine winner
           if (results.isNotEmpty) {
             final maxVotes = results.values.reduce((a, b) => a > b ? a : b);
             _winner = results.entries.firstWhere((entry) => entry.value == maxVotes).key;
@@ -578,17 +582,53 @@ class _ResultsPageState extends State<ResultsPage> {
         return Map<String, int>.from(data['results']);
       } else {
         print("Error fetching results: ${jsonDecode(response.body)['message']}");
-        setState(() => _isServerShutdown = true); // Assume server is down
+        setState(() => _isServerShutdown = true);
       }
     } catch (e) {
       print("Error fetching results: $e");
-      setState(() => _isServerShutdown = true); // Assume server is down
+      setState(() => _isServerShutdown = true);
     }
-    return {};
+    return _lastResults; // Return cached results on failure
   }
 
   void _exitApp() {
-    SystemNavigator.pop();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A1A),
+        title: const Text(
+          'Exit Votely',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        ),
+        content: const Text(
+          'Are you sure you want to exit the app?',
+          style: TextStyle(color: Color(0xFFB0B0B0)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFFFFD700)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (kIsWeb) {
+                html.window.close();
+              } else {
+                SystemNavigator.pop();
+              }
+            },
+            child: const Text(
+              'Exit',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -622,7 +662,7 @@ class _ResultsPageState extends State<ResultsPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                if (_errorMessage != null)
+                if (_errorMessage != null && !_isServerShutdown)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
@@ -688,7 +728,7 @@ class _ResultsPageState extends State<ResultsPage> {
                           ),
                         );
                       }
-                      final results = snapshot.data ?? {};
+                      final results = _isServerShutdown ? _lastResults : (snapshot.data ?? _lastResults);
                       if (results.isEmpty && !_isServerShutdown) {
                         return const Center(
                           child: Text(
@@ -753,7 +793,7 @@ class AddCandidatePage extends StatefulWidget {
 }
 
 class _AddCandidatePageState extends State<AddCandidatePage> {
-  final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
+  final String serverUrl = 'http://192.168.29.80:5000';
   final _formKey = GlobalKey<FormState>();
   final _candidateController = TextEditingController();
   String? _errorMessage;
@@ -961,7 +1001,7 @@ class _AnimatedButtonState extends State<AnimatedButton> {
             elevation: 0,
             color: Colors.transparent,
             child: InkWell(
-              onTap: null, // Handled by GestureDetector
+              onTap: null,
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 padding: const EdgeInsets.all(16),

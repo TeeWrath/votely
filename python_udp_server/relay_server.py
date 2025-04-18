@@ -3,6 +3,7 @@ from flask_cors import CORS
 import socket
 import json
 import time
+import os
 
 app = Flask(__name__)
 CORS(app)  # Allow all origins for development
@@ -58,8 +59,18 @@ def get_results():
             print(f"Error parsing results: {e}")
             return jsonify({"status": "error", "message": "Failed to parse results"}), 500
     else:
-        print(f"Error fetching results: {error}")
-        return jsonify({"status": "error", "message": f"Failed to fetch results: {error}"}), 500
+        # Fallback to reading totalvotes.json
+        try:
+            if os.path.exists("totalvotes.json"):
+                with open("totalvotes.json", "r") as f:
+                    votes = json.load(f)
+                    return jsonify({"status": "success", "results": votes})
+            else:
+                print("totalvotes.json not found")
+                return jsonify({"status": "error", "message": "No results available"}), 404
+        except Exception as e:
+            print(f"Error reading totalvotes.json: {e}")
+            return jsonify({"status": "error", "message": f"Failed to fetch results: {error}"}), 500
 
 @app.route('/add_candidate', methods=['POST'])
 def add_candidate():
