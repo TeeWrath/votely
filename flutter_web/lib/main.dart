@@ -17,74 +17,202 @@ class VotingApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Votely',
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF121212), // Darker background
-        primaryColor: const Color(0xFFFFF176), // Neon yellow
+        scaffoldBackgroundColor: const Color(0xFF0A0A0A), // Deep black
+        primaryColor: const Color(0xFFFFD700), // Vibrant gold
         textTheme: const TextTheme(
           headlineLarge: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-            letterSpacing: 1.2,
-          ),
-          headlineMedium: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w800,
             color: Colors.white,
-            letterSpacing: 1.0,
+            letterSpacing: 0.5,
+          ),
+          headlineMedium: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            letterSpacing: 0.5,
           ),
           bodyLarge: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
           bodyMedium: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Color(0xFFE0E0E0),
+            color: Color(0xFFB0B0B0),
+          ),
+          labelLarge: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFF176), // Neon yellow
+            backgroundColor: const Color(0xFFFFD700),
             foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            elevation: 12,
-            shadowColor: Colors.black.withOpacity(0.5),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-              side: BorderSide(color: Colors.black, width: 3),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            elevation: 3,
+            shadowColor: Colors.black.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Color(0xFF1A1A1A), width: 1),
             ),
             textStyle: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            side: const BorderSide(color: Color(0xFFFFD700), width: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
         cardTheme: CardTheme(
-          color: const Color(0xFF2C2C2C), // Dark card
-          elevation: 15,
-          shadowColor: Colors.black.withOpacity(0.6),
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-            side: BorderSide(color: Colors.black, width: 3),
+          color: const Color(0xFF1A1A1A),
+          elevation: 2,
+          shadowColor: Colors.black.withOpacity(0.3),
+          margin: const EdgeInsets.all(8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
         snackBarTheme: SnackBarThemeData(
           backgroundColor: const Color(0xFF00E676), // Neon green
           contentTextStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
           behavior: SnackBarBehavior.floating,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
           actionTextColor: Colors.white,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1A1A1A),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFFFD700), width: 2),
+          ),
+          labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+          hintStyle: const TextStyle(color: Color(0xFF606060)),
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const VotingPage(),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  final List<Map<String, dynamic>> _pages = [
+    {'title': 'Vote', 'icon': Icons.how_to_vote, 'page': const VotingPage()},
+    {'title': 'Results', 'icon': Icons.bar_chart, 'page': const ResultsPage()},
+    {
+      'title': 'Add Candidate',
+      'icon': Icons.person_add,
+      'page': const AddCandidatePage()
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWideScreen = constraints.maxWidth > 800;
+        return Scaffold(
+          body: Row(
+            children: [
+              if (isWideScreen)
+                NavigationRail(
+                  backgroundColor: const Color(0xFF1A1A1A),
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  selectedLabelTextStyle: const TextStyle(
+                    color: Color(0xFFFFD700),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelTextStyle: const TextStyle(
+                    color: Color(0xFFB0B0B0),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  destinations: _pages
+                      .map((page) => NavigationRailDestination(
+                            icon: Icon(page['icon'], color: const Color(0xFFB0B0B0)),
+                            selectedIcon:
+                                Icon(page['icon'], color: const Color(0xFFFFD700)),
+                            label: Text(page['title']),
+                          ))
+                      .toList(),
+                ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: _pages[_currentIndex]['page'],
+                ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: isWideScreen
+              ? null
+              : BottomNavigationBar(
+                  backgroundColor: const Color(0xFF1A1A1A),
+                  selectedItemColor: const Color(0xFFFFD700),
+                  unselectedItemColor: const Color(0xFFB0B0B0),
+                  currentIndex: _currentIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  items: _pages
+                      .map((page) => BottomNavigationBarItem(
+                            icon: Icon(page['icon']),
+                            label: page['title'],
+                          ))
+                      .toList(),
+                ),
+        );
+      },
     );
   }
 }
@@ -97,8 +225,262 @@ class VotingPage extends StatefulWidget {
 }
 
 class _VotingPageState extends State<VotingPage> {
-  final candidates = ["Alice", "Bob", "Charlie"];
+  final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
+  List<String> candidates = ["Alice", "Bob", "Charlie"];
+  final _streamController = StreamController<List<String>>.broadcast();
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _startPollingCandidates();
+    _fetchAndUpdateCandidates();
+  }
+
+  void _startPollingCandidates() {
+    Timer.periodic(const Duration(seconds: 5), (timer) async {
+      if (_streamController.isClosed) {
+        timer.cancel();
+        return;
+      }
+      await _fetchAndUpdateCandidates();
+    });
+  }
+
+  Future<void> _fetchAndUpdateCandidates() async {
+    final results = await fetchResults();
+    if (!_streamController.isClosed) {
+      if (results.isNotEmpty) {
+        candidates = results.keys.toList();
+        _streamController.add(candidates);
+        setState(() => _errorMessage = null);
+      } else {
+        setState(() => _errorMessage = "Failed to fetch candidates");
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _streamController.close();
+    super.dispose();
+  }
+
+  Future<void> sendVote(String candidate) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$serverUrl/vote'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'candidate': candidate}),
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Voted for $candidate!"),
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to vote: ${jsonDecode(response.body)['message']}"),
+              backgroundColor: Colors.redAccent,
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error voting: $e"),
+            backgroundColor: Colors.redAccent,
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<Map<String, int>> fetchResults() async {
+    try {
+      final response = await http.get(Uri.parse('$serverUrl/results'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Map<String, int>.from(data['results']);
+      }
+    } catch (e) {
+      print("Error fetching results: $e");
+    }
+    return {};
+  }
+
+  Future<void> shutdownServer() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$serverUrl/shutdown'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text("Server shutting down..."),
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to shutdown: ${jsonDecode(response.body)['message']}"),
+              backgroundColor: Colors.redAccent,
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error shutting down: $e"),
+            backgroundColor: Colors.redAccent,
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWideScreen = constraints.maxWidth > 800;
+        final gridCrossAxisCount = isWideScreen ? 4 : 2;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Votely - Vote'),
+            centerTitle: true,
+            backgroundColor: const Color(0xFF1A1A1A),
+            elevation: 2,
+            foregroundColor: Colors.white,
+          ),
+          body: Container(
+            color: const Color(0xFF0A0A0A),
+            padding: EdgeInsets.all(isWideScreen ? 32 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Cast Your Vote',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFFFD700),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                Expanded(
+                  child: StreamBuilder<List<String>>(
+                    stream: _streamController.stream,
+                    builder: (context, snapshot) {
+                      final currentCandidates =
+                          snapshot.hasData ? snapshot.data! : candidates;
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: gridCrossAxisCount,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 1.5,
+                        ),
+                        itemCount: currentCandidates.length,
+                        itemBuilder: (context, index) {
+                          final candidate = currentCandidates[index];
+                          return AnimatedButton(
+                            candidate: candidate,
+                            onPressed: () => sendVote(candidate),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: shutdownServer,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.redAccent, width: 2),
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: const Text('Close Server'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ResultsPage extends StatefulWidget {
+  const ResultsPage({super.key});
+
+  @override
+  _ResultsPageState createState() => _ResultsPageState();
+}
+
+class _ResultsPageState extends State<ResultsPage> {
+  final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
   final _streamController = StreamController<Map<String, int>>.broadcast();
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -120,8 +502,12 @@ class _VotingPageState extends State<VotingPage> {
   Future<void> _fetchAndUpdateResults() async {
     final results = await fetchResults();
     if (!_streamController.isClosed) {
-      print("Fetched results: $results");
-      _streamController.add(results);
+      if (results.isNotEmpty) {
+        _streamController.add(results);
+        setState(() => _errorMessage = null);
+      } else {
+        setState(() => _errorMessage = "Failed to fetch results");
+      }
     }
   }
 
@@ -131,76 +517,14 @@ class _VotingPageState extends State<VotingPage> {
     super.dispose();
   }
 
-  Future<void> sendVote(String candidate) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:5000/vote'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'candidate': candidate}),
-      );
-
-      if (response.statusCode == 200) {
-        await _fetchAndUpdateResults();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Voted for $candidate!"),
-              action: SnackBarAction(
-                label: 'CLOSE',
-                onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                },
-              ),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Failed to vote: ${response.body}"),
-              backgroundColor: Colors.redAccent,
-              action: SnackBarAction(
-                label: 'CLOSE',
-                onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                },
-              ),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Error: $e"),
-            backgroundColor: Colors.redAccent,
-            action: SnackBarAction(
-              label: 'CLOSE',
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              },
-            ),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
   Future<Map<String, int>> fetchResults() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://localhost:5000/results'),
-      );
-      print("HTTP response status: ${response.statusCode}");
-      print("HTTP response body: ${response.body}");
+      final response = await http.get(Uri.parse('$serverUrl/results'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return Map<String, int>.from(data['results']);
+      } else {
+        print("Error fetching results: ${jsonDecode(response.body)['message']}");
       }
     } catch (e) {
       print("Error fetching results: $e");
@@ -210,166 +534,266 @@ class _VotingPageState extends State<VotingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWideScreen = screenWidth > 600;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWideScreen = constraints.maxWidth > 800;
+        final cardWidth = isWideScreen ? 400.0 : constraints.maxWidth * 0.9;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [const Color(0xFF121212), const Color(0xFF1A1A1A)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Votely - Results'),
+            centerTitle: true,
+            backgroundColor: const Color(0xFF1A1A1A),
+            elevation: 2,
+            foregroundColor: Colors.white,
           ),
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                backgroundColor: Colors.transparent,
-                elevation: 20,
-                shadowColor: Colors.black.withOpacity(0.7),
-                flexibleSpace: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF2C2C2C), Color(0xFF1A1A1A)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+          body: Container(
+            color: const Color(0xFF0A0A0A),
+            padding: EdgeInsets.all(isWideScreen ? 32 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Live Results',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFFFD700),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  child: const Center(
+                Expanded(
+                  child: StreamBuilder<Map<String, int>>(
+                    stream: _streamController.stream,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting &&
+                          !snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFFFD700),
+                            strokeWidth: 4,
+                          ),
+                        );
+                      }
+                      final results = snapshot.data ?? {};
+                      if (results.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No results available',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFB0B0B0),
+                            ),
+                          ),
+                        );
+                      }
+                      final totalVotes =
+                          results.values.fold(0, (sum, v) => sum + v);
+                      return ListView.builder(
+                        itemCount: results.length,
+                        itemBuilder: (context, index) {
+                          final candidate = results.keys.elementAt(index);
+                          final votes = results[candidate] ?? 0;
+                          final votePercentage = totalVotes > 0
+                              ? (votes / totalVotes * 100).toStringAsFixed(1)
+                              : "0.0";
+                          return Center(
+                            child: SizedBox(
+                              width: cardWidth,
+                              child: ResultCard(
+                                candidate: candidate,
+                                votes: votes,
+                                votePercentage: votePercentage,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class AddCandidatePage extends StatefulWidget {
+  const AddCandidatePage({super.key});
+
+  @override
+  _AddCandidatePageState createState() => _AddCandidatePageState();
+}
+
+class _AddCandidatePageState extends State<AddCandidatePage> {
+  final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
+  final _formKey = GlobalKey<FormState>();
+  final _candidateController = TextEditingController();
+  String? _errorMessage;
+
+  Future<void> addCandidate() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final candidate = _candidateController.text.trim();
+    try {
+      final response = await http.post(
+        Uri.parse('$serverUrl/add_candidate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'candidate': candidate}),
+      );
+
+      if (response.statusCode == 200) {
+        _candidateController.clear();
+        setState(() => _errorMessage = null);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Added $candidate!"),
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        setState(() => _errorMessage = jsonDecode(response.body)['message']);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to add candidate: ${jsonDecode(response.body)['message']}"),
+              backgroundColor: Colors.redAccent,
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() => _errorMessage = "Error adding candidate: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error adding candidate: $e"),
+            backgroundColor: Colors.redAccent,
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _candidateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWideScreen = constraints.maxWidth > 800;
+        final formWidth = isWideScreen ? 400.0 : constraints.maxWidth * 0.9;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Votely - Add Candidate'),
+            centerTitle: true,
+            backgroundColor: const Color(0xFF1A1A1A),
+            elevation: 2,
+            foregroundColor: Colors.white,
+          ),
+          body: Container(
+            color: const Color(0xFF0A0A0A),
+            padding: EdgeInsets.all(isWideScreen ? 32 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Add New Candidate',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFFFD700),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
-                      "VOTELY",
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 2.0,
-                        shadows: [
-                          Shadow(
-                            color: Color(0xFFFFF176),
-                            blurRadius: 10,
-                            offset: Offset(0, 0),
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                Center(
+                  child: SizedBox(
+                    width: formWidth,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _candidateController,
+                            decoration: const InputDecoration(
+                              labelText: 'Candidate Name',
+                              hintText: 'Enter candidate name',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a candidate name';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: addCandidate,
+                            child: const Text('Add Candidate'),
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(isWideScreen ? 32.0 : 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        "CAST YOUR VOTE",
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFFFF176),
-                          letterSpacing: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: isWideScreen ? 40 : 30),
-                      Wrap(
-                        spacing: isWideScreen ? 16 : 12,
-                        runSpacing: isWideScreen ? 16 : 12,
-                        alignment: WrapAlignment.center,
-                        children:
-                            candidates.map((c) {
-                              return SizedBox(
-                                width: isWideScreen ? 200 : 160,
-                                child: AnimatedButton(
-                                  candidate: c,
-                                  onPressed: () => sendVote(c),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                      SizedBox(height: isWideScreen ? 50 : 40),
-                      const Text(
-                        "LIVE RESULTS",
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFFFF176),
-                          letterSpacing: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: isWideScreen ? 30 : 20),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: StreamBuilder<Map<String, int>>(
-                  stream: _streamController.stream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting &&
-                        !snapshot.hasData) {
-                      return const Center(
-                        child: SizedBox(
-                          height: 100,
-                          child: CircularProgressIndicator(
-                            color: Color(0xFFFFF176),
-                            strokeWidth: 6,
-                            backgroundColor: Color(0xFF2C2C2C),
-                          ),
-                        ),
-                      );
-                    }
-                    if (snapshot.hasError || !snapshot.hasData) {
-                      return const Center(
-                        child: Text(
-                          "ERROR LOADING RESULTS",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                      );
-                    }
-                    final results = snapshot.data!;
-                    final totalVotes = results.values.fold(
-                      0,
-                      (sum, v) => sum + v,
-                    );
-                    print("Rendering results: $results");
-                    return Column(
-                      children:
-                          candidates.map((candidate) {
-                            final votes = results[candidate] ?? 0;
-                            final votePercentage =
-                                totalVotes > 0
-                                    ? (votes / totalVotes * 100)
-                                        .toStringAsFixed(1)
-                                    : "0.0";
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: isWideScreen ? 32 : 20,
-                                vertical: 8,
-                              ),
-                              child: ResultCard(
-                                candidate: candidate,
-                                votes: votes,
-                                votePercentage: votePercentage,
-                              ),
-                            );
-                          }).toList(),
-                    );
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -390,39 +814,59 @@ class AnimatedButton extends StatefulWidget {
 
 class _AnimatedButtonState extends State<AnimatedButton> {
   bool _isPressed = false;
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onPressed();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
-        transform: Matrix4.identity()..scale(_isPressed ? 0.95 : 1.0),
-        child: ElevatedButton(
-          onPressed: null, // Handled by GestureDetector
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                _isPressed ? const Color(0xFFD4CA60) : const Color(0xFFFFF176),
-            foregroundColor: Colors.black,
-            elevation: _isPressed ? 8 : 12,
-            shadowColor: Colors.white.withOpacity(0.5),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-              side: BorderSide(color: Colors.white, width: 3),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          widget.onPressed();
+        },
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          transform: Matrix4.identity()..scale(_isPressed ? 0.98 : 1.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            gradient: LinearGradient(
+              colors: _isHovered
+                  ? [const Color(0xFFFFD700), const Color(0xFFE6C200)]
+                  : [const Color(0xFF1A1A1A), const Color(0xFF2C2C2C)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isPressed ? 0.2 : 0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: Text(
-            widget.candidate.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0,
-              color: Colors.white,
+          child: Card(
+            elevation: 0,
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: null, // Handled by GestureDetector
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Text(
+                    widget.candidate.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: _isHovered ? Colors.black : Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -448,64 +892,65 @@ class ResultCard extends StatelessWidget {
     return Card(
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C),
-          border: Border.all(color: Colors.black, width: 3),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    candidate.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    child: Text(
-                      "$votes VOTES",
-                      key: ValueKey<int>(votes),
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF00E676),
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              LinearProgressIndicator(
-                value: double.parse(votePercentage) / 100,
-                backgroundColor: const Color(0xFF1A1A1A),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  Color(0xFFFFF176),
-                ),
-                minHeight: 8,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "$votePercentage% of votes",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFE0E0E0),
-                ),
-              ),
-            ],
+          borderRadius: BorderRadius.circular(8),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1A1A1A), Color(0xFF2C2C2C)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  candidate.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: Text(
+                    '$votes Votes',
+                    key: ValueKey<int>(votes),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF00E676),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: double.parse(votePercentage) / 100,
+              backgroundColor: const Color(0xFF2C2C2C),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFFFFD700),
+              ),
+              minHeight: 6,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '$votePercentage% of votes',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFFB0B0B0),
+              ),
+            ),
+          ],
         ),
       ),
     );
