@@ -70,17 +70,6 @@ pip install flask flask-cors
 python server.py        # Starts UDP/TCP server
 python relay_server.py  # Starts Flask relay server
 ```
-
-### Optional: Use ngrok  
-Expose the Flask server for remote access:  
-```bash
-ngrok http 5000
-```
-Update `serverUrl` in `main.dart` with the ngrok URL and rebuild:  
-```bash
-flutter build web --release
-```
-
 ---
 
 ## 📲 Usage  
@@ -90,15 +79,6 @@ flutter build web --release
 - **View Results**: Check live vote counts and the leader in the “Results” tab.  
 - **Close Server**: Use the “Close Server” button in the “Vote” tab to shut down and see final results.  
 - **Exit App**: In the “Results” tab, click “Exit App” to close the browser tab.  
-
----
-
-## 🌐 Deployment  
-
-GitHub Pages hosts the static Flutter frontend. For the backend:  
-- **Local**: Run `server.py` and `relay_server.py` with ngrok.  
-- **Hosted**: Deploy `relay_server.py` to Render/Heroku.  
-- **Mock**: Mock `fetchResults` in `main.dart` for demos.  
 
 ---
 
