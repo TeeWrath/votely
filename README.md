@@ -119,4 +119,3 @@ This project is licensed under the **MIT License** – see the [`LICENSE`](LICEN
 ---
 
 Made with ❤️ by Subroto Banerjee
-```
