@@ -82,6 +82,19 @@ python relay_server.py  # Starts Flask relay server
 
 ---
 
+## 📸 Screenshots
+<div style="display: flex; overflow-x: auto; gap: 10px;">
+  <img src="https://github.com/user-attachments/assets/739ca650-2f75-4bd0-8b90-91f0bedcbca8" width="400" height="250" />
+  <img src="https://github.com/user-attachments/assets/2ccc548f-f44b-4ee0-83db-788501b99797" width="400" height="250" />
+  <img src="https://github.com/user-attachments/assets/c67e1c84-e389-4738-8d5b-bc35acb83f18" width="400" height="250" />
+  <img src="https://github.com/user-attachments/assets/d338aa09-bf60-43df-ae12-3b0fc6ec7843" width="400" height="250" />
+  <img src="https://github.com/user-attachments/assets/53247cdc-95ce-442f-9fd1-6f814fecd5c6" width="400" height="250" />
+  <img src="https://github.com/user-attachments/assets/9e930ea3-8ea1-47c9-ae3d-549d5649c4c6" width="400" height="250" />
+<!--   <img src="https://github.com/user-attachments/assets/c91c125e-fac0-41e0-a478-05dab92355a1" width="400" height="250" /> -->
+</div>
+
+---
+
 ## 🤝 Contributing  
 
 1. Fork the repository.  
