@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
@@ -137,14 +138,28 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Map<String, dynamic>> _pages = [
-    {'title': 'Vote', 'icon': Icons.how_to_vote, 'page': const VotingPage()},
-    {'title': 'Results', 'icon': Icons.bar_chart, 'page': const ResultsPage()},
+    {
+      'title': 'Vote',
+      'icon': Icons.how_to_vote,
+      'page': const VotingPage(),
+    },
+    {
+      'title': 'Results',
+      'icon': Icons.bar_chart,
+      'page': const ResultsPage(),
+    },
     {
       'title': 'Add Candidate',
       'icon': Icons.person_add,
-      'page': const AddCandidatePage()
+      'page': const AddCandidatePage(),
     },
   ];
+
+  void _switchToResults() {
+    setState(() {
+      _currentIndex = 1; // Results page index
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,8 +190,7 @@ class _HomePageState extends State<HomePage> {
                   destinations: _pages
                       .map((page) => NavigationRailDestination(
                             icon: Icon(page['icon'], color: const Color(0xFFB0B0B0)),
-                            selectedIcon:
-                                Icon(page['icon'], color: const Color(0xFFFFD700)),
+                            selectedIcon: Icon(page['icon'], color: const Color(0xFFFFD700)),
                             label: Text(page['title']),
                           ))
                       .toList(),
@@ -226,7 +240,7 @@ class VotingPage extends StatefulWidget {
 
 class _VotingPageState extends State<VotingPage> {
   final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
-  List<String> candidates = ["Alice", "Bob", "Charlie"];
+  List<String> candidates = []; // No placeholder candidates
   final _streamController = StreamController<List<String>>.broadcast();
   String? _errorMessage;
 
@@ -250,13 +264,9 @@ class _VotingPageState extends State<VotingPage> {
   Future<void> _fetchAndUpdateCandidates() async {
     final results = await fetchResults();
     if (!_streamController.isClosed) {
-      if (results.isNotEmpty) {
-        candidates = results.keys.toList();
-        _streamController.add(candidates);
-        setState(() => _errorMessage = null);
-      } else {
-        setState(() => _errorMessage = "Failed to fetch candidates");
-      }
+      candidates = results.keys.toList();
+      _streamController.add(candidates);
+      setState(() => _errorMessage = null);
     }
   }
 
@@ -350,6 +360,9 @@ class _VotingPageState extends State<VotingPage> {
               duration: const Duration(seconds: 3),
             ),
           );
+          // Redirect to Results page
+          final homePageState = context.findAncestorStateOfType<_HomePageState>();
+          homePageState?._switchToResults();
         }
       } else {
         if (mounted) {
@@ -431,8 +444,34 @@ class _VotingPageState extends State<VotingPage> {
                   child: StreamBuilder<List<String>>(
                     stream: _streamController.stream,
                     builder: (context, snapshot) {
-                      final currentCandidates =
-                          snapshot.hasData ? snapshot.data! : candidates;
+                      final currentCandidates = snapshot.hasData ? snapshot.data! : candidates;
+                      if (currentCandidates.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'No candidates available',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFB0B0B0),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final homePageState = context.findAncestorStateOfType<_HomePageState>();
+                                  homePageState?.setState(() {
+                                    homePageState._currentIndex = 2; // Add Candidate page
+                                  });
+                                },
+                                child: const Text('Add Candidates'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                       return GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: gridCrossAxisCount,
@@ -481,6 +520,8 @@ class _ResultsPageState extends State<ResultsPage> {
   final String serverUrl = 'http://192.168.29.80:5000'; // Your machine's IP
   final _streamController = StreamController<Map<String, int>>.broadcast();
   String? _errorMessage;
+  String? _winner;
+  bool _isServerShutdown = false;
 
   @override
   void initState() {
@@ -491,7 +532,7 @@ class _ResultsPageState extends State<ResultsPage> {
 
   void _startPolling() {
     Timer.periodic(const Duration(seconds: 2), (timer) async {
-      if (_streamController.isClosed) {
+      if (_streamController.isClosed || _isServerShutdown) {
         timer.cancel();
         return;
       }
@@ -504,9 +545,21 @@ class _ResultsPageState extends State<ResultsPage> {
     if (!_streamController.isClosed) {
       if (results.isNotEmpty) {
         _streamController.add(results);
-        setState(() => _errorMessage = null);
+        setState(() {
+          _errorMessage = null;
+          // Determine winner
+          if (results.isNotEmpty) {
+            final maxVotes = results.values.reduce((a, b) => a > b ? a : b);
+            _winner = results.entries.firstWhere((entry) => entry.value == maxVotes).key;
+          } else {
+            _winner = null;
+          }
+        });
       } else {
-        setState(() => _errorMessage = "Failed to fetch results");
+        setState(() {
+          _errorMessage = "Failed to fetch results";
+          _winner = null;
+        });
       }
     }
   }
@@ -525,11 +578,17 @@ class _ResultsPageState extends State<ResultsPage> {
         return Map<String, int>.from(data['results']);
       } else {
         print("Error fetching results: ${jsonDecode(response.body)['message']}");
+        setState(() => _isServerShutdown = true); // Assume server is down
       }
     } catch (e) {
       print("Error fetching results: $e");
+      setState(() => _isServerShutdown = true); // Assume server is down
     }
     return {};
+  }
+
+  void _exitApp() {
+    SystemNavigator.pop();
   }
 
   @override
@@ -553,9 +612,9 @@ class _ResultsPageState extends State<ResultsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Live Results',
-                  style: TextStyle(
+                Text(
+                  _isServerShutdown ? 'Final Results' : 'Live Results',
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFFFFD700),
@@ -576,12 +635,52 @@ class _ResultsPageState extends State<ResultsPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
+                if (_isServerShutdown && _winner != null)
+                  Center(
+                    child: SizedBox(
+                      width: cardWidth,
+                      child: Card(
+                        elevation: 4,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFFD700), Color(0xFFE6C200)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            'Winner: ${_winner!.toUpperCase()}',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_isServerShutdown && _winner == null)
+                  const Center(
+                    child: Text(
+                      'No votes recorded',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFB0B0B0),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
                 Expanded(
                   child: StreamBuilder<Map<String, int>>(
                     stream: _streamController.stream,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting &&
-                          !snapshot.hasData) {
+                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                         return const Center(
                           child: CircularProgressIndicator(
                             color: Color(0xFFFFD700),
@@ -590,7 +689,7 @@ class _ResultsPageState extends State<ResultsPage> {
                         );
                       }
                       final results = snapshot.data ?? {};
-                      if (results.isEmpty) {
+                      if (results.isEmpty && !_isServerShutdown) {
                         return const Center(
                           child: Text(
                             'No results available',
@@ -602,8 +701,7 @@ class _ResultsPageState extends State<ResultsPage> {
                           ),
                         );
                       }
-                      final totalVotes =
-                          results.values.fold(0, (sum, v) => sum + v);
+                      final totalVotes = results.values.fold(0, (sum, v) => sum + v);
                       return ListView.builder(
                         itemCount: results.length,
                         itemBuilder: (context, index) {
@@ -627,6 +725,17 @@ class _ResultsPageState extends State<ResultsPage> {
                     },
                   ),
                 ),
+                if (_isServerShutdown) ...[
+                  const SizedBox(height: 16),
+                  OutlinedButton(
+                    onPressed: _exitApp,
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.redAccent, width: 2),
+                      foregroundColor: Colors.redAccent,
+                    ),
+                    child: const Text('Exit App'),
+                  ),
+                ],
               ],
             ),
           ),
