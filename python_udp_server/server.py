@@ -21,6 +21,7 @@ def udp_server():
 
 def tcp_server():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((HOST, TCP_PORT))
     sock.listen(1)
     print(f"TCP server started on {HOST}:{TCP_PORT}")
@@ -30,7 +31,7 @@ def tcp_server():
             data = conn.recv(1024).decode().strip()
             if data == "GET_VOTES":
                 conn.sendall(json.dumps(dict(votes)).encode())
-            print(f"Served vote results to {addr}")
+            # print(f"Served vote results to {addr}")
 
 if __name__ == "__main__":
     udp_thread = threading.Thread(target=udp_server)
