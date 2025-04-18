@@ -1,4 +1,4 @@
-name: Deploy Flutter Web to GitHub Pages deploy yamk
+name: Deploy Flutter Web to GitHub Pages
 
 on:
   push:
@@ -18,15 +18,11 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '1.0.0' # Use a stable version, update if needed
+          flutter-version: '3.22.0' # Updated to a recent stable version
           channel: 'stable'
           cache: true
 
-      # Move to project directory
-      - name: change directory
-        run: cd flutter_web
-
-      # Install dependencies
+      # Install dependencies (run from root directory)
       - name: Install dependencies
         run: flutter pub get
 
