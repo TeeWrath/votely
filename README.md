@@ -1,8 +1,3 @@
-Sure! Here's your **Votely** documentation converted to **Markdown format**:
-
----
-
-```markdown
 # Votely
 
 **Votely** is a modern, real-time voting application built for simplicity and style. It features a responsive Flutter web frontend with a dark, elegant UI and a robust Python backend using UDP/TCP servers for vote processing. Users can add candidates, cast votes, and view live results with a winner announcement. Designed as a college project, Votely showcases seamless integration of frontend and backend technologies — perfect for small-scale elections or demos.
@@ -273,9 +268,5 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-**Built for a college project by [Your Name]. Powered by Flutter and Python.**
+**Built for a college project by Subroto Banerjee. Powered by Flutter and Python.**
 ```
-
----
-
-Let me know if you want this saved as a `.md` file or if you'd like help with screenshots or README polishing!
